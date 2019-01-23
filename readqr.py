@@ -1,19 +1,23 @@
-#readme
-#import readqrで使用可能
-#readqr.read()の返し値が埋め込まれたテキストデータである
-#--------------------------------------------------------------------
-#使用例
-#
-#import readqr
-#n=readqr.read();
-#print(n)
-#
-#この例に示したプログラムでは埋め込まれたテキストデータが表示される
-#大事に使用してほしい
 from pyzbar.pyzbar import decode
 from pyzbar.pyzbar import ZBarSymbol
 import cv2
 import numpy as np
+
+def check():
+    bookname=read()
+    booksdata=load_data();
+    booksvalue=get_booksvalue();
+    readflg=0;
+
+    for i in range(booksvalue):
+        if bookname==booksdata[i][0] and booksdata[i][1]=="0":
+            print("借りることができます");
+            readflg=1;
+            break;
+            
+    if readflg==0:
+        print("見つかりませんでした");
+    return 0;
 
 def edit_contrast(image, gamma):
     """コントラクト調整"""
@@ -31,6 +35,7 @@ def read():
         capture = cv2.VideoCapture(0)
         if capture.isOpened() is False:
             raise("IO Error")
+    print("準備完了");
     while True:
         ret, frame = capture.read()
         if ret == False:
@@ -43,3 +48,31 @@ def read():
         codes = decode(image)
         if len(codes) > 0:
             return codes[0][0].decode('utf-8', 'ignore')
+
+def get_booksvalue():
+    filename="bookstates.csv";
+    fp=open(filename,"rt",encoding="utf-8");
+    tsv=fp.read();
+
+    rows=tsv.split("\n");
+    result=[];
+    for line in rows:
+        cols=line.split(",");
+        if len(cols)<=1:break;
+        result.append(cols);
+
+    return len(result);
+
+def load_data():
+    filename="bookstates.csv";
+    fp=open(filename,"rt",encoding="utf-8");
+    tsv=fp.read();
+
+    rows=tsv.split("\n");
+    result=[];
+    for line in rows:
+        cols=line.split(",");
+        if len(cols)<=1:break;
+        result.append(cols);
+
+    return result;

@@ -1,0 +1,3 @@
+import readqr
+
+readqr.check();
