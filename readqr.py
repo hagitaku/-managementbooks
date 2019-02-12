@@ -2,19 +2,25 @@ from pyzbar.pyzbar import decode
 from pyzbar.pyzbar import ZBarSymbol
 import cv2
 import numpy as np
+import csv
 
 def check():
     bookname=read()
     booksdata=load_data();
     booksvalue=get_booksvalue();
     readflg=0;
-
+    print("読み取ったデータは",bookname,"です")
     for i in range(booksvalue):
         if bookname==booksdata[i][0] and booksdata[i][1]=="0":
             print("借りることができます");
             readflg=1;
             break;
-            
+        elif bookname==booksdata[i][0] and booksdata[i][1]=="1":
+            print("ほかの誰かが借りているため、借りることができません")
+            print("借りている人は",booksdata[i][2],"です")
+            readflg=1;
+            break;
+
     if readflg==0:
         print("見つかりませんでした");
     return 0;
@@ -50,7 +56,7 @@ def read():
             return codes[0][0].decode('utf-8', 'ignore')
 
 def get_booksvalue():
-    filename="bookstates.csv";
+    filename="db/bookstates.csv";
     fp=open(filename,"rt",encoding="utf-8");
     tsv=fp.read();
 
@@ -64,7 +70,7 @@ def get_booksvalue():
     return len(result);
 
 def load_data():
-    filename="bookstates.csv";
+    filename="db/bookstates.csv";
     fp=open(filename,"rt",encoding="utf-8");
     tsv=fp.read();
 
@@ -76,3 +82,30 @@ def load_data():
         result.append(cols);
 
     return result;
+
+def read_csv(filename):
+    f = open(filename, "r")
+    csv_data = csv.reader(f)
+    list = [ e for e in csv_data]
+    f.close()
+    return list
+    
+def update_list2d(list, data):
+    for i in range(len(list)):
+        if list[i][0]==data[0]: list[i] = data
+    return list
+
+def write_csv(filename, list):
+   with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(list)   
+
+   f.close()
+
+def write(booksname,num,borrow):
+    filename = 'db/bookstates.csv'
+    csv_data = read_csv(filename)
+    data = [booksname,num,borrow]
+    csv_data2 = update_list2d(csv_data, data)
+    write_csv(filename, csv_data2)
+    
